@@ -1,11 +1,11 @@
 """Adapter for the Anthropic Messages API.
 
-Translates between unifyllm's OpenAI-shaped interface and Anthropic's
+Translates between bridgellm's OpenAI-shaped interface and Anthropic's
 content-block-based API. Handles system-as-parameter, content blocks,
 tool_result messages, image format conversion, extended thinking, and
 the multi-event streaming protocol.
 
-Requires: pip install unifyllm[anthropic]
+Requires: pip install bridgellm[anthropic]
 """
 
 import asyncio

@@ -2,7 +2,7 @@
 
 import pytest
 
-from unifyllm.budget import TokenBudget, _repair_tool_pairs
+from bridgellm.budget import TokenBudget, _repair_tool_pairs
 
 
 class TestTokenBudgetInit:

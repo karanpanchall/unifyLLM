@@ -1,6 +1,6 @@
 """Tests for reasoning model detection and parameter sanitization."""
 
-from unifyllm._model_caps import is_reasoning_model, requires_max_completion_tokens, sanitize_params
+from bridgellm._model_caps import is_reasoning_model, requires_max_completion_tokens, sanitize_params
 
 
 class TestIsReasoningModel:

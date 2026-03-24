@@ -1,4 +1,4 @@
-"""Shared fixtures for unifyllm tests."""
+"""Shared fixtures for bridgellm tests."""
 
 import pytest
 
@@ -6,7 +6,7 @@ import pytest
 @pytest.fixture(autouse=True)
 def _clean_provider_registry():
     """Reset the provider registry after each test to prevent leaks."""
-    from unifyllm.registry import PROVIDERS
+    from bridgellm.registry import PROVIDERS
 
     original = dict(PROVIDERS)
     yield

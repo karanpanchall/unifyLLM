@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from unifyllm.adapters.anthropic import (
+from bridgellm.adapters.anthropic import (
     _assemble_tools,
     _convert_tools,
     _map_stop_reason,
@@ -19,8 +19,8 @@ from unifyllm.adapters.anthropic import (
     _prepare_messages,
     _translate_tool_choice,
 )
-from unifyllm.errors import ProviderError, SDKNotInstalledError
-from unifyllm.models import ToolCall
+from bridgellm.errors import ProviderError, SDKNotInstalledError
+from bridgellm.models import ToolCall
 
 
 # -- Helper function tests --
@@ -241,7 +241,7 @@ class TestAnthropicAdapterSDKMissing:
     def test_raises_sdk_not_installed(self):
         with patch.dict("sys.modules", {"anthropic": None}):
             with pytest.raises((SDKNotInstalledError, ImportError)):
-                from unifyllm.adapters.anthropic import _get_anthropic_module
+                from bridgellm.adapters.anthropic import _get_anthropic_module
                 _get_anthropic_module()
 
 
@@ -313,8 +313,8 @@ class _MockAsyncIter:
 
 def _make_adapter():
     """Create an AnthropicAdapter with a mocked SDK client."""
-    from unifyllm.adapters.anthropic import AnthropicAdapter
-    from unifyllm.registry import ProviderConfig
+    from bridgellm.adapters.anthropic import AnthropicAdapter
+    from bridgellm.registry import ProviderConfig
 
     config = ProviderConfig(
         base_url="https://api.anthropic.com",

@@ -53,7 +53,7 @@ def openai_image_to_anthropic(content_block: dict) -> Optional[dict]:
 def openai_pdf_to_anthropic(content_block: dict) -> Optional[dict]:
     """Convert a PDF content block to Anthropic document format.
 
-    unifyllm canonical: {"type": "document", "source": {"type": "base64", "media_type": "application/pdf", "data": "..."}}
+    bridgellm canonical: {"type": "document", "source": {"type": "base64", "media_type": "application/pdf", "data": "..."}}
     This is already Anthropic's format. Pass through as-is, or convert from URL variant.
     Also handles: {"type": "file", "file": {"url": "data:application/pdf;base64,..."}}
     """

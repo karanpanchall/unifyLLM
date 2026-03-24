@@ -1,16 +1,16 @@
-# unifyllm
+# bridgellm
 
 Provider-agnostic LLM client with agentic capabilities. One interface, any provider, zero wrapper libraries.
 
 ```
-pip install unifyllm
+pip install bridgellm
 ```
 
 Optional providers:
 ```
-pip install unifyllm[anthropic]    # Anthropic Claude support
-pip install unifyllm[gemini]       # Google Gemini native support
-pip install unifyllm[all]          # All optional providers
+pip install bridgellm[anthropic]    # Anthropic Claude support
+pip install bridgellm[gemini]       # Google Gemini native support
+pip install bridgellm[all]          # All optional providers
 ```
 
 ---
@@ -18,9 +18,9 @@ pip install unifyllm[all]          # All optional providers
 ## Quick Start
 
 ```python
-from unifyllm import UnifyLLM
+from bridgellm import BridgeLLM
 
-llm = UnifyLLM(model="openai/gpt-4o")
+llm = BridgeLLM(model="openai/gpt-4o")
 
 response = await llm.complete(
     messages=[{"role": "user", "content": "Explain quantum computing in one sentence."}]
@@ -31,10 +31,10 @@ print(response.content)
 Switch providers by changing the model string. No code changes needed.
 
 ```python
-llm = UnifyLLM(model="groq/llama-3.3-70b")       # Groq
-llm = UnifyLLM(model="anthropic/claude-sonnet-4")  # Anthropic
-llm = UnifyLLM(model="together/llama-3.3-70b")     # Together AI
-llm = UnifyLLM(model="deepseek/deepseek-chat")     # DeepSeek
+llm = BridgeLLM(model="groq/llama-3.3-70b")       # Groq
+llm = BridgeLLM(model="anthropic/claude-sonnet-4")  # Anthropic
+llm = BridgeLLM(model="together/llama-3.3-70b")     # Together AI
+llm = BridgeLLM(model="deepseek/deepseek-chat")     # DeepSeek
 ```
 
 ---
@@ -66,13 +66,13 @@ Keys are resolved in this order: `api_keys` dict → `api_key` single → custom
 
 ```python
 # Reads OPENAI_API_KEY from environment
-llm = UnifyLLM(model="openai/gpt-4o")
+llm = BridgeLLM(model="openai/gpt-4o")
 
 # Explicit key
-llm = UnifyLLM(model="openai/gpt-4o", api_key="sk-...")
+llm = BridgeLLM(model="openai/gpt-4o", api_key="sk-...")
 
 # Multiple providers with per-provider keys
-llm = UnifyLLM(
+llm = BridgeLLM(
     model="openai/gpt-4o",
     api_keys={
         "openai": "sk-...",
@@ -82,7 +82,7 @@ llm = UnifyLLM(
 )
 
 # Custom environment variable names
-llm = UnifyLLM(
+llm = BridgeLLM(
     model="openai/gpt-4o",
     env_var_names={
         "openai": "MY_APP_OPENAI_KEY",
@@ -102,7 +102,7 @@ print(llm.active_providers)  # ['openai', 'groq', 'anthropic']
 Load from YAML, JSON, Django settings, or any config source.
 
 ```python
-llm = UnifyLLM.from_config({
+llm = BridgeLLM.from_config({
     "model": "openai/gpt-4o",
     "api_keys": {"openai": "sk-...", "groq": "gsk-..."},
     "system_prompt": "You are a helpful assistant.",
@@ -116,7 +116,7 @@ llm = UnifyLLM.from_config({
 Set a default persona that auto-injects into every call.
 
 ```python
-llm = UnifyLLM(
+llm = BridgeLLM(
     model="openai/gpt-4o",
     system_prompt="You are a senior Python developer. Be concise.",
 )
@@ -136,7 +136,7 @@ await llm.complete(messages=[
 Set default models for different tasks.
 
 ```python
-llm = UnifyLLM(
+llm = BridgeLLM(
     model="openai/gpt-4o",                           # Chat
     embedding_model="openai/text-embedding-3-small",  # Embeddings
     tts_model="openai/tts-1",                         # Text-to-speech
@@ -154,7 +154,7 @@ await llm.transcribe(audio_bytes)        # Uses whisper-1
 Use different models on any call without creating a new client.
 
 ```python
-llm = UnifyLLM(model="openai/gpt-4o", api_keys={...})
+llm = BridgeLLM(model="openai/gpt-4o", api_keys={...})
 
 fast = await llm.complete(messages=[...], model="groq/llama-3.3-70b")
 smart = await llm.complete(messages=[...], model="anthropic/claude-sonnet-4")
@@ -166,7 +166,7 @@ cheap = await llm.embed(texts=[...], model="together/m2-bert-80M")
 Automatically try backup models if the primary fails.
 
 ```python
-llm = UnifyLLM(
+llm = BridgeLLM(
     model="openai/gpt-4o",
     fallback_models=["groq/llama-3.3-70b", "together/llama-3.3-70b"],
     api_keys={"openai": "sk-...", "groq": "gsk-...", "together": "tog-..."},
@@ -181,7 +181,7 @@ response = await llm.complete(messages=[...])
 Point at a proxy, gateway, or self-hosted endpoint.
 
 ```python
-llm = UnifyLLM(
+llm = BridgeLLM(
     model="openai/gpt-4o",
     base_url="https://my-proxy.example.com/v1",
     api_key="sk-...",
@@ -224,7 +224,7 @@ async for chunk in llm.stream(
 ### RequestConfig — Advanced Parameters
 
 ```python
-from unifyllm import RequestConfig
+from bridgellm import RequestConfig
 
 response = await llm.complete(
     messages=[...],
@@ -273,7 +273,7 @@ for call in response.tool_calls:
 Reasoning models (OpenAI o-series, DeepSeek R1) are automatically detected. Temperature and other unsupported parameters are stripped with a logged warning.
 
 ```python
-llm = UnifyLLM(model="openai/o3-mini")
+llm = BridgeLLM(model="openai/o3-mini")
 
 response = await llm.complete(
     messages=[...],
@@ -287,7 +287,7 @@ print(response.reasoning_content)  # Model's internal reasoning (if available)
 ### Audio Input / Output
 
 ```python
-from unifyllm import AudioConfig, RequestConfig
+from bridgellm import AudioConfig, RequestConfig
 
 response = await llm.complete(
     messages=[
@@ -331,7 +331,7 @@ result = await llm.embed(texts=["hello"], dimensions=256)
 
 ```python
 result = await llm.speak(
-    text="Hello world, this is unifyllm speaking.",
+    text="Hello world, this is bridgellm speaking.",
     voice="nova",
     response_format="mp3",
     speed=1.0,
@@ -361,7 +361,7 @@ print(result.duration)  # 2.5
 Auto-generate OpenAI tool definitions from Python functions.
 
 ```python
-from unifyllm import tool
+from bridgellm import tool
 
 @tool
 async def get_weather(city: str, unit: str = "celsius") -> str:
@@ -416,7 +416,7 @@ async def create_note(title: str, content: str, context: dict = None) -> str:
 ## Tool Registry
 
 ```python
-from unifyllm import ToolRegistry
+from bridgellm import ToolRegistry
 
 registry = ToolRegistry([get_weather, search_docs, create_note])
 
@@ -437,7 +437,7 @@ print(registry.tool_names)  # ["get_weather", "search_docs", "create_note"]
 Automated tool-calling loop: LLM decides which tools to call, results are fed back, repeat until the model responds with text.
 
 ```python
-from unifyllm import UnifyLLM, AgentLoop, tool
+from bridgellm import BridgeLLM, AgentLoop, tool
 
 @tool
 async def search(query: str) -> str:
@@ -449,7 +449,7 @@ async def calculate(expression: str) -> str:
     """Evaluate a math expression."""
     return str(eval(expression))
 
-llm = UnifyLLM(model="openai/gpt-4o", system_prompt="You are a helpful assistant.")
+llm = BridgeLLM(model="openai/gpt-4o", system_prompt="You are a helpful assistant.")
 agent = AgentLoop(llm=llm, tools=[search, calculate])
 
 async for event in agent.run(messages=[{"role": "user", "content": "What is 2+2?"}]):
@@ -472,7 +472,7 @@ async for event in agent.run(messages=[{"role": "user", "content": "What is 2+2?
 Every option is configurable. Nothing is forced.
 
 ```python
-from unifyllm import AgentLoop, RetryPolicy, RequestConfig
+from bridgellm import AgentLoop, RetryPolicy, RequestConfig
 
 agent = AgentLoop(
     llm=llm,
@@ -562,7 +562,7 @@ The loop stops when any of these conditions is met:
 Trim messages to fit within a context window. No hardcoded model limits — you provide the numbers.
 
 ```python
-from unifyllm import TokenBudget
+from bridgellm import TokenBudget
 
 budget = TokenBudget(context_window=128000, headroom=4096)
 
@@ -608,24 +608,24 @@ Metadata fields are populated only when the provider API exposes them. OpenAI an
 Register self-hosted, private, or new providers at runtime.
 
 ```python
-from unifyllm import register_provider, ProviderConfig
+from bridgellm import register_provider, ProviderConfig
 
 register_provider("my_vllm", ProviderConfig(
     base_url="http://localhost:8000/v1",
     api_key_env="MY_VLLM_KEY",
 ))
 
-llm = UnifyLLM(model="my_vllm/llama-3-70b")
+llm = BridgeLLM(model="my_vllm/llama-3-70b")
 ```
 
 ---
 
 ## Error Handling
 
-All errors inherit from `UnifyLLMError` for broad catching, with specific types for narrow handling.
+All errors inherit from `BridgeLLMError` for broad catching, with specific types for narrow handling.
 
 ```python
-from unifyllm import UnifyLLMError, ProviderError, ProviderNotFoundError, AllProvidersFailedError
+from bridgellm import BridgeLLMError, ProviderError, ProviderNotFoundError, AllProvidersFailedError
 
 try:
     response = await llm.complete(messages=[...])
@@ -637,8 +637,8 @@ except AllProvidersFailedError as exc:
 except ProviderError as exc:
     print(f"[{exc.provider_name}] {exc}")
     print(f"Status: {exc.status_code}")
-except UnifyLLMError as exc:
-    print(f"unifyllm error: {exc}")
+except BridgeLLMError as exc:
+    print(f"bridgellm error: {exc}")
 ```
 
 ### Key Masking
@@ -646,7 +646,7 @@ except UnifyLLMError as exc:
 API keys are never logged or exposed in error messages.
 
 ```python
-from unifyllm import mask_key
+from bridgellm import mask_key
 
 print(mask_key("sk-proj-abc123def456"))  # "****f456"
 ```
@@ -655,33 +655,33 @@ print(mask_key("sk-proj-abc123def456"))  # "****f456"
 
 ## SDK Version Safety
 
-unifyllm checks installed SDK versions at import time and warns if they are outside the tested range.
+bridgellm checks installed SDK versions at import time and warns if they are outside the tested range.
 
 ```
-⚠ unifyllm 0.1.0 was tested with openai<=2.x, but you have 3.1.0.
-  Run: pip install --upgrade unifyllm
+⚠ bridgellm 0.1.0 was tested with openai<=2.x, but you have 3.1.0.
+  Run: pip install --upgrade bridgellm
 ```
 
 Check for library updates programmatically:
 
 ```python
-from unifyllm import check_updates
+from bridgellm import check_updates
 
 message = await check_updates()
 if message:
-    print(message)  # "unifyllm 0.2.0 is available..."
+    print(message)  # "bridgellm 0.2.0 is available..."
 ```
 
 ---
 
 ## Concurrency
 
-unifyllm is safe for concurrent use. One client handles multiple simultaneous calls with connection pooling and thread-safe adapter caching.
+bridgellm is safe for concurrent use. One client handles multiple simultaneous calls with connection pooling and thread-safe adapter caching.
 
 ```python
 import asyncio
 
-llm = UnifyLLM(model="openai/gpt-4o")
+llm = BridgeLLM(model="openai/gpt-4o")
 
 results = await asyncio.gather(
     llm.complete(messages=[{"role": "user", "content": "Question 1"}]),

@@ -1,49 +1,49 @@
-"""Tests for the UnifyLLM client — routing, caching, and fallback logic."""
+"""Tests for the BridgeLLM client — routing, caching, and fallback logic."""
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from unifyllm.client import UnifyLLM
-from unifyllm.errors import AllProvidersFailedError, ProviderError, ProviderNotFoundError
-from unifyllm.models import EmbeddingResponse, LLMResponse, ModelInfo, StreamChunk, ToolCall
+from bridgellm.client import BridgeLLM
+from bridgellm.errors import AllProvidersFailedError, ProviderError, ProviderNotFoundError
+from bridgellm.models import EmbeddingResponse, LLMResponse, ModelInfo, StreamChunk, ToolCall
 
 
 class TestClientInit:
     def test_defaults_to_env_or_fallback(self, openai_api_key, monkeypatch):
-        monkeypatch.delenv("UNIFYLLM_MODEL", raising=False)
-        llm = UnifyLLM()
+        monkeypatch.delenv("BRIDGELLM_MODEL", raising=False)
+        llm = BridgeLLM()
         # Should not raise — uses default model with openai provider
 
     def test_explicit_model(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         assert llm._model_string == "openai/gpt-4o"
 
     def test_env_model(self, openai_api_key, monkeypatch):
-        monkeypatch.setenv("UNIFYLLM_MODEL", "groq/llama-3")
+        monkeypatch.setenv("BRIDGELLM_MODEL", "groq/llama-3")
         monkeypatch.setenv("GROQ_API_KEY", "gsk-test")
-        llm = UnifyLLM()
+        llm = BridgeLLM()
         assert llm._model_string == "groq/llama-3"
 
     def test_unknown_provider_raises(self, monkeypatch):
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         with pytest.raises(ProviderNotFoundError):
-            UnifyLLM(model="nonexistent/model")
+            BridgeLLM(model="nonexistent/model")
 
     def test_missing_api_key_raises(self, monkeypatch):
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         with pytest.raises(ValueError, match="OPENAI_API_KEY"):
-            UnifyLLM(model="gpt-4o")
+            BridgeLLM(model="gpt-4o")
 
     def test_explicit_api_key(self):
-        llm = UnifyLLM(model="openai/gpt-4o", api_key="sk-explicit")
+        llm = BridgeLLM(model="openai/gpt-4o", api_key="sk-explicit")
         # Should not raise
 
 
 class TestClientComplete:
     @pytest.mark.asyncio
     async def test_routes_to_adapter(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         mock_response = LLMResponse(content="Hello", model="gpt-4o", finish_reason="stop")
         llm._primary_adapter.complete = AsyncMock(return_value=mock_response)
 
@@ -55,7 +55,7 @@ class TestClientComplete:
         monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
         monkeypatch.setenv("GROQ_API_KEY", "gsk-test")
 
-        llm = UnifyLLM(
+        llm = BridgeLLM(
             model="openai/gpt-4o",
             fallback_models=["groq/llama-3"],
         )
@@ -75,7 +75,7 @@ class TestClientComplete:
 
     @pytest.mark.asyncio
     async def test_all_fail_raises(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         llm._primary_adapter.complete = AsyncMock(
             side_effect=ProviderError("openai", "error")
         )
@@ -87,7 +87,7 @@ class TestClientComplete:
 class TestClientStream:
     @pytest.mark.asyncio
     async def test_yields_chunks(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
 
         async def mock_stream(**kwargs):
             yield StreamChunk(delta_content="Hello ")
@@ -105,7 +105,7 @@ class TestClientStream:
 
     @pytest.mark.asyncio
     async def test_stream_all_fail_raises(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
 
         async def failing_stream(**kwargs):
             raise ProviderError("openai", "stream failed")
@@ -121,7 +121,7 @@ class TestClientStream:
 class TestClientEmbed:
     @pytest.mark.asyncio
     async def test_embed_with_primary(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         mock_response = EmbeddingResponse(vectors=[[0.1, 0.2]], model="emb", input_tokens=5)
         llm._primary_adapter.embed = AsyncMock(return_value=mock_response)
 
@@ -133,7 +133,7 @@ class TestClientEmbed:
         monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
         monkeypatch.setenv("GROQ_API_KEY", "gsk-test")
 
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         mock_response = EmbeddingResponse(vectors=[[0.1]], model="emb")
 
         # Override the embedding adapter
@@ -147,7 +147,7 @@ class TestClientEmbed:
 class TestClientListModels:
     @pytest.mark.asyncio
     async def test_lists_models(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         mock_models = [ModelInfo(model_id="gpt-4o", provider="openai")]
         llm._primary_adapter.list_models = AsyncMock(return_value=mock_models)
 
@@ -159,7 +159,7 @@ class TestClientListModels:
 class TestClientEmbedQuery:
     @pytest.mark.asyncio
     async def test_returns_single_vector(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         mock_response = EmbeddingResponse(vectors=[[0.1, 0.2, 0.3]], model="emb", input_tokens=5)
         llm._primary_adapter.embed = AsyncMock(return_value=mock_response)
 
@@ -169,14 +169,14 @@ class TestClientEmbedQuery:
 
 class TestClientBaseUrlOverride:
     def test_base_url_applied(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o", base_url="https://custom-proxy.com/v1")
+        llm = BridgeLLM(model="openai/gpt-4o", base_url="https://custom-proxy.com/v1")
         # Should not raise — just verifies constructor accepts base_url
 
 
 class TestSystemPrompt:
     @pytest.mark.asyncio
     async def test_prepends_system_prompt(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o", system_prompt="You are a pirate.")
+        llm = BridgeLLM(model="openai/gpt-4o", system_prompt="You are a pirate.")
         mock_response = LLMResponse(content="Ahoy!", model="gpt-4o", finish_reason="stop")
         llm._primary_adapter.complete = AsyncMock(return_value=mock_response)
 
@@ -190,7 +190,7 @@ class TestSystemPrompt:
 
     @pytest.mark.asyncio
     async def test_skips_when_system_already_present(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o", system_prompt="Default persona.")
+        llm = BridgeLLM(model="openai/gpt-4o", system_prompt="Default persona.")
         mock_response = LLMResponse(content="ok", model="gpt-4o", finish_reason="stop")
         llm._primary_adapter.complete = AsyncMock(return_value=mock_response)
 
@@ -208,7 +208,7 @@ class TestSystemPrompt:
 
     @pytest.mark.asyncio
     async def test_no_system_prompt_no_change(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")  # no system_prompt
+        llm = BridgeLLM(model="openai/gpt-4o")  # no system_prompt
         mock_response = LLMResponse(content="ok", model="gpt-4o", finish_reason="stop")
         llm._primary_adapter.complete = AsyncMock(return_value=mock_response)
 
@@ -220,7 +220,7 @@ class TestSystemPrompt:
 
     @pytest.mark.asyncio
     async def test_system_prompt_in_stream(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o", system_prompt="Be concise.")
+        llm = BridgeLLM(model="openai/gpt-4o", system_prompt="Be concise.")
 
         captured_messages = None
 
@@ -238,7 +238,7 @@ class TestSystemPrompt:
         assert captured_messages[0]["content"] == "Be concise."
 
     def test_from_config_with_system_prompt(self, openai_api_key):
-        llm = UnifyLLM.from_config({
+        llm = BridgeLLM.from_config({
             "model": "openai/gpt-4o",
             "system_prompt": "You are a helpful tutor.",
         })
@@ -247,7 +247,7 @@ class TestSystemPrompt:
 
 class TestAdapterCaching:
     def test_same_provider_reuses_adapter(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         adapter_a, _ = llm._resolve_adapter("openai/gpt-4o-mini")
         adapter_b, _ = llm._resolve_adapter("openai/gpt-5")
         assert adapter_a is adapter_b
@@ -257,7 +257,7 @@ class TestEagerProviderInit:
     def test_all_api_keys_providers_initialized(self, monkeypatch):
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         monkeypatch.delenv("GROQ_API_KEY", raising=False)
-        llm = UnifyLLM(
+        llm = BridgeLLM(
             model="openai/gpt-4o",
             api_keys={"openai": "sk-test", "groq": "gsk-test"},
         )
@@ -268,7 +268,7 @@ class TestEagerProviderInit:
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         # "badprovider" is not in registry — should warn, not crash
         # But the primary model init will use openai which has a key
-        llm = UnifyLLM(
+        llm = BridgeLLM(
             model="openai/gpt-4o",
             api_keys={"openai": "sk-test", "badprovider": "bad-key"},
         )
@@ -276,7 +276,7 @@ class TestEagerProviderInit:
         # badprovider should have been skipped with a warning
 
     def test_active_providers_property(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         assert "openai" in llm.active_providers
         assert isinstance(llm.active_providers, list)
 
@@ -285,7 +285,7 @@ class TestMultiProviderApiKeys:
     def test_api_keys_dict(self, monkeypatch):
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         monkeypatch.delenv("GROQ_API_KEY", raising=False)
-        llm = UnifyLLM(
+        llm = BridgeLLM(
             model="openai/gpt-4o",
             api_keys={"openai": "sk-from-dict", "groq": "gsk-from-dict"},
         )
@@ -293,7 +293,7 @@ class TestMultiProviderApiKeys:
 
     def test_api_keys_dict_overrides_env(self, monkeypatch):
         monkeypatch.setenv("OPENAI_API_KEY", "sk-from-env")
-        llm = UnifyLLM(
+        llm = BridgeLLM(
             model="openai/gpt-4o",
             api_keys={"openai": "sk-from-dict"},
         )
@@ -301,12 +301,12 @@ class TestMultiProviderApiKeys:
 
     def test_falls_back_to_single_key(self, monkeypatch):
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-        llm = UnifyLLM(model="openai/gpt-4o", api_key="sk-single-key")
+        llm = BridgeLLM(model="openai/gpt-4o", api_key="sk-single-key")
         # Single key used as fallback for any provider
 
     def test_falls_back_to_env_when_no_dict_entry(self, monkeypatch):
         monkeypatch.setenv("OPENAI_API_KEY", "sk-from-env")
-        llm = UnifyLLM(
+        llm = BridgeLLM(
             model="openai/gpt-4o",
             api_keys={"groq": "gsk-only-groq"},  # no openai entry
         )
@@ -317,7 +317,7 @@ class TestCustomEnvVarNames:
     def test_custom_env_var_name(self, monkeypatch):
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         monkeypatch.setenv("MY_APP_LLM_KEY", "sk-from-custom-env")
-        llm = UnifyLLM(
+        llm = BridgeLLM(
             model="openai/gpt-4o",
             env_var_names={"openai": "MY_APP_LLM_KEY"},
         )
@@ -326,7 +326,7 @@ class TestCustomEnvVarNames:
     def test_falls_back_to_default_env_var(self, monkeypatch):
         monkeypatch.setenv("OPENAI_API_KEY", "sk-from-default")
         monkeypatch.delenv("MY_MISSING_VAR", raising=False)
-        llm = UnifyLLM(
+        llm = BridgeLLM(
             model="openai/gpt-4o",
             env_var_names={"openai": "MY_MISSING_VAR"},
         )
@@ -335,7 +335,7 @@ class TestCustomEnvVarNames:
     def test_from_config_with_env_var_names(self, monkeypatch):
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         monkeypatch.setenv("PROD_OPENAI_KEY", "sk-prod")
-        llm = UnifyLLM.from_config({
+        llm = BridgeLLM.from_config({
             "model": "openai/gpt-4o",
             "env_var_names": {"openai": "PROD_OPENAI_KEY"},
         })
@@ -344,7 +344,7 @@ class TestCustomEnvVarNames:
 class TestTaskSpecificModels:
     @pytest.mark.asyncio
     async def test_embedding_model_used(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o", embedding_model="openai/text-embedding-3-small")
+        llm = BridgeLLM(model="openai/gpt-4o", embedding_model="openai/text-embedding-3-small")
         mock_response = EmbeddingResponse(vectors=[[0.1]], model="emb")
         llm._primary_adapter.embed = AsyncMock(return_value=mock_response)
 
@@ -353,26 +353,26 @@ class TestTaskSpecificModels:
         assert call_kwargs["model"] == "text-embedding-3-small"
 
     def test_tts_model_default(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         assert llm._tts_model == "openai/tts-1"
 
     def test_tts_model_custom(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o", tts_model="openai/gpt-4o-mini-tts")
+        llm = BridgeLLM(model="openai/gpt-4o", tts_model="openai/gpt-4o-mini-tts")
         assert llm._tts_model == "openai/gpt-4o-mini-tts"
 
     def test_transcription_model_default(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         assert llm._transcription_model == "openai/whisper-1"
 
 
 class TestFromConfig:
     def test_from_config_basic(self, openai_api_key):
-        llm = UnifyLLM.from_config({"model": "openai/gpt-4o"})
+        llm = BridgeLLM.from_config({"model": "openai/gpt-4o"})
         assert llm._model_string == "openai/gpt-4o"
 
     def test_from_config_full(self, monkeypatch):
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-        llm = UnifyLLM.from_config({
+        llm = BridgeLLM.from_config({
             "model": "openai/gpt-4o",
             "api_keys": {"openai": "sk-from-config"},
             "fallback_models": ["groq/llama-3"],
@@ -386,12 +386,12 @@ class TestFromConfig:
         assert llm._tts_model == "openai/gpt-4o-mini-tts"
 
     def test_from_config_empty_dict(self, openai_api_key):
-        llm = UnifyLLM.from_config({})
+        llm = BridgeLLM.from_config({})
         # Falls back to defaults
 
     def test_from_config_with_base_url(self, monkeypatch):
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-        llm = UnifyLLM.from_config({
+        llm = BridgeLLM.from_config({
             "model": "openai/gpt-4o",
             "api_key": "sk-test",
             "base_url": "https://my-proxy.com/v1",
@@ -401,7 +401,7 @@ class TestFromConfig:
 class TestPerCallModelOverride:
     @pytest.mark.asyncio
     async def test_complete_with_model_override(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         mock_response = LLMResponse(content="From mini", model="gpt-4o-mini")
         llm._primary_adapter.complete = AsyncMock(return_value=mock_response)
 
@@ -411,7 +411,7 @@ class TestPerCallModelOverride:
 
     @pytest.mark.asyncio
     async def test_stream_with_model_override(self, openai_api_key):
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
 
         async def mock_stream(**kwargs):
             assert kwargs["model"] == "gpt-4o-mini"
@@ -429,7 +429,7 @@ class TestListModelsProvider:
         monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
         monkeypatch.setenv("GROQ_API_KEY", "gsk-test")
 
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
         groq_adapter = llm._resolve_adapter("groq/any")[0]
         groq_adapter.list_models = AsyncMock(return_value=[
             ModelInfo(model_id="llama-3", provider="groq"),

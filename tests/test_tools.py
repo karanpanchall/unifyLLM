@@ -2,7 +2,7 @@
 
 import pytest
 
-from unifyllm.tools import ToolDefinition, ToolRegistry, tool
+from bridgellm.tools import ToolDefinition, ToolRegistry, tool
 
 
 @tool

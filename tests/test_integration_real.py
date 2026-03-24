@@ -8,7 +8,7 @@ import os
 
 import pytest
 
-from unifyllm import UnifyLLM, LLMResponse, StreamChunk, EmbeddingResponse, ModelInfo
+from bridgellm import BridgeLLM, LLMResponse, StreamChunk, EmbeddingResponse, ModelInfo
 
 SKIP_REASON = "OPENAI_API_KEY not set — skipping real API tests"
 requires_api_key = pytest.mark.skipif(
@@ -22,7 +22,7 @@ class TestRealCompletion:
     @pytest.mark.asyncio
     async def test_simple_completion(self):
         """Verify a basic completion round-trip against the real API."""
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
 
         response = await llm.complete(
             messages=[{"role": "user", "content": "Reply with exactly: UNIFYLLM_OK"}],
@@ -42,7 +42,7 @@ class TestRealCompletion:
     @pytest.mark.asyncio
     async def test_completion_with_tools(self):
         """Verify tool calling works end-to-end."""
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
 
         tools = [{
             "type": "function",
@@ -82,7 +82,7 @@ class TestRealStreaming:
     @pytest.mark.asyncio
     async def test_stream_text(self):
         """Verify streaming produces text deltas and a finish chunk."""
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
 
         collected_text = ""
         chunk_count = 0
@@ -113,7 +113,7 @@ class TestRealStreaming:
     @pytest.mark.asyncio
     async def test_stream_tool_calls(self):
         """Verify streaming assembles tool calls correctly."""
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
 
         tools = [{
             "type": "function",
@@ -152,7 +152,7 @@ class TestRealEmbeddings:
     @pytest.mark.asyncio
     async def test_single_embedding(self):
         """Verify embedding generation for a single text."""
-        llm = UnifyLLM(model="text-embedding-3-small")
+        llm = BridgeLLM(model="text-embedding-3-small")
 
         result = await llm.embed(texts=["Hello world"])
 
@@ -165,7 +165,7 @@ class TestRealEmbeddings:
     @pytest.mark.asyncio
     async def test_batch_embeddings(self):
         """Verify batch embedding works for multiple texts."""
-        llm = UnifyLLM(model="text-embedding-3-small")
+        llm = BridgeLLM(model="text-embedding-3-small")
 
         texts = ["First document", "Second document", "Third document"]
         result = await llm.embed(texts=texts)
@@ -178,7 +178,7 @@ class TestRealEmbeddings:
     @pytest.mark.asyncio
     async def test_embedding_with_dimensions(self):
         """Verify custom dimension parameter works."""
-        llm = UnifyLLM(model="text-embedding-3-small")
+        llm = BridgeLLM(model="text-embedding-3-small")
 
         result = await llm.embed(texts=["Test"], dimensions=256)
 
@@ -192,7 +192,7 @@ class TestRealListModels:
     @pytest.mark.asyncio
     async def test_list_models(self):
         """Verify model listing returns real model data."""
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
 
         models = await llm.list_models()
 
@@ -209,9 +209,9 @@ class TestRealRequestConfig:
     @pytest.mark.asyncio
     async def test_json_mode(self):
         """Verify structured output with response_format works."""
-        from unifyllm import RequestConfig
+        from bridgellm import RequestConfig
 
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
         config = RequestConfig(response_format={"type": "json_object"})
 
         response = await llm.complete(
@@ -229,9 +229,9 @@ class TestRealRequestConfig:
     @pytest.mark.asyncio
     async def test_stop_sequences(self):
         """Verify stop sequences truncate output."""
-        from unifyllm import RequestConfig
+        from bridgellm import RequestConfig
 
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
         config = RequestConfig(stop=["3"])
 
         response = await llm.complete(
@@ -247,9 +247,9 @@ class TestRealRequestConfig:
     @pytest.mark.asyncio
     async def test_seed_determinism(self):
         """Verify seed produces consistent output."""
-        from unifyllm import RequestConfig
+        from bridgellm import RequestConfig
 
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
         config = RequestConfig(seed=12345)
         messages = [{"role": "user", "content": "Pick a random number between 1 and 100. Just the number."}]
 
@@ -264,7 +264,7 @@ class TestRealEmbedQuery:
     @pytest.mark.asyncio
     async def test_embed_query_returns_vector(self):
         """Verify embed_query convenience method."""
-        llm = UnifyLLM(model="text-embedding-3-small")
+        llm = BridgeLLM(model="text-embedding-3-small")
         vector = await llm.embed_query("Hello world")
         assert isinstance(vector, list)
         assert len(vector) == 1536
@@ -277,7 +277,7 @@ class TestRealProviderSwitch:
     @pytest.mark.asyncio
     async def test_switch_model_same_provider(self):
         """Verify the same client works when switching models within OpenAI."""
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
 
         response = await llm.complete(
             messages=[{"role": "user", "content": "Say OK"}],
@@ -290,7 +290,7 @@ class TestRealProviderSwitch:
     @pytest.mark.asyncio
     async def test_embed_with_different_model(self):
         """Verify embed() accepts a different model than the primary."""
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
 
         result = await llm.embed(
             texts=["Hello"],
@@ -303,7 +303,7 @@ class TestRealProviderSwitch:
     @pytest.mark.asyncio
     async def test_multiple_models_one_client(self):
         """Verify one client can call different models on each request."""
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
 
         # Call 1: gpt-4o-mini (default)
         resp_mini = await llm.complete(
@@ -330,7 +330,7 @@ class TestRealProviderSwitch:
     @pytest.mark.asyncio
     async def test_task_specific_defaults(self):
         """Verify embedding_model default routes correctly."""
-        llm = UnifyLLM(
+        llm = BridgeLLM(
             model="gpt-4o-mini",
             embedding_model="openai/text-embedding-3-small",
         )

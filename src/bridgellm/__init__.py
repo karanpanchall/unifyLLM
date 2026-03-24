@@ -1,16 +1,16 @@
-"""unifyllm — Provider-agnostic LLM client with agentic capabilities.
+"""bridgellm — Provider-agnostic LLM client with agentic capabilities.
 
 One interface, any provider, zero wrapper libraries.
 
 Usage:
-    from unifyllm import UnifyLLM, tool, AgentLoop
+    from bridgellm import BridgeLLM, tool, AgentLoop
 
     @tool
     async def get_weather(city: str) -> str:
         '''Get weather for a city.'''
         return "72°F"
 
-    llm = UnifyLLM(model="openai/gpt-4o")
+    llm = BridgeLLM(model="openai/gpt-4o")
     agent = AgentLoop(llm=llm, tools=[get_weather])
 
     async for event in agent.run(messages=[...]):
@@ -19,14 +19,14 @@ Usage:
 
 from .agent import AgentEvent, AgentLoop, RetryPolicy
 from .budget import TokenBudget
-from .client import UnifyLLM
+from .client import BridgeLLM
 from .compat import check_updates, verify_sdk_versions
 from .errors import (
     AllProvidersFailedError,
     ProviderError,
     ProviderNotFoundError,
     SDKNotInstalledError,
-    UnifyLLMError,
+    BridgeLLMError,
 )
 from .models import (
     AudioConfig,
@@ -45,7 +45,7 @@ from .tools import ToolDefinition, ToolRegistry, tool
 
 __all__ = [
     # Client
-    "UnifyLLM",
+    "BridgeLLM",
     # Agent
     "AgentLoop",
     "AgentEvent",
@@ -71,7 +71,7 @@ __all__ = [
     "TranscriptionResponse",
     "ModelInfo",
     # Errors
-    "UnifyLLMError",
+    "BridgeLLMError",
     "ProviderError",
     "ProviderNotFoundError",
     "SDKNotInstalledError",

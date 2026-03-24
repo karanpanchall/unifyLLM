@@ -1,15 +1,15 @@
-"""Exception hierarchy for unifyllm.
+"""Exception hierarchy for bridgellm.
 
-All exceptions inherit from UnifyLLMError so callers can catch broadly
+All exceptions inherit from BridgeLLMError so callers can catch broadly
 or narrowly depending on their needs.
 """
 
 
-class UnifyLLMError(Exception):
-    """Base exception for all unifyllm errors."""
+class BridgeLLMError(Exception):
+    """Base exception for all bridgellm errors."""
 
 
-class ProviderNotFoundError(UnifyLLMError):
+class ProviderNotFoundError(BridgeLLMError):
     """Raised when a model string references an unknown provider."""
 
     def __init__(self, provider_name: str, available: list[str]):
@@ -19,11 +19,11 @@ class ProviderNotFoundError(UnifyLLMError):
         super().__init__(
             f"Unknown provider '{provider_name}'. "
             f"Available providers: {available_list}. "
-            f"Register new providers with unifyllm.register_provider()."
+            f"Register new providers with bridgellm.register_provider()."
         )
 
 
-class SDKNotInstalledError(UnifyLLMError):
+class SDKNotInstalledError(BridgeLLMError):
     """Raised when a provider requires an SDK that is not installed."""
 
     def __init__(self, provider_name: str, package_name: str, extras_name: str):
@@ -31,11 +31,11 @@ class SDKNotInstalledError(UnifyLLMError):
         self.package_name = package_name
         super().__init__(
             f"Provider '{provider_name}' requires the '{package_name}' package. "
-            f"Install it with: pip install unifyllm[{extras_name}]"
+            f"Install it with: pip install bridgellm[{extras_name}]"
         )
 
 
-class ProviderError(UnifyLLMError):
+class ProviderError(BridgeLLMError):
     """Wraps provider-specific SDK errors into a uniform type.
 
     Preserves the original exception as `__cause__` for debugging.
@@ -47,7 +47,7 @@ class ProviderError(UnifyLLMError):
         super().__init__(f"[{provider_name}] {message}")
 
 
-class AllProvidersFailedError(UnifyLLMError):
+class AllProvidersFailedError(BridgeLLMError):
     """Raised when every provider in a fallback chain has failed."""
 
     def __init__(self, errors: list[Exception]):

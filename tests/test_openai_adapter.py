@@ -13,16 +13,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from unifyllm.adapters.openai_compat import (
+from bridgellm.adapters.openai_compat import (
     OpenAICompatAdapter,
     _accumulate_tool_deltas,
     _assemble_tool_calls,
     _parse_tool_calls,
     _safe_parse_json,
 )
-from unifyllm.errors import ProviderError
-from unifyllm.models import LLMResponse, StreamChunk, ToolCall
-from unifyllm.registry import ProviderConfig
+from bridgellm.errors import ProviderError
+from bridgellm.models import LLMResponse, StreamChunk, ToolCall
+from bridgellm.registry import ProviderConfig
 
 
 # -- Fixtures that replicate real SDK response shapes --
@@ -471,8 +471,8 @@ class TestRequestConfigForwarding:
 
     @pytest.mark.asyncio
     async def test_response_format(self):
-        from unifyllm.models import RequestConfig
-        from unifyllm.adapters.openai_compat import _build_request
+        from bridgellm.models import RequestConfig
+        from bridgellm.adapters.openai_compat import _build_request
 
         config = RequestConfig(response_format={"type": "json_object"})
         kwargs = _build_request("gpt-4o", [], None, 0.7, 100, config)
@@ -480,8 +480,8 @@ class TestRequestConfigForwarding:
 
     @pytest.mark.asyncio
     async def test_stop_sequences(self):
-        from unifyllm.adapters.openai_compat import _build_request
-        from unifyllm.models import RequestConfig
+        from bridgellm.adapters.openai_compat import _build_request
+        from bridgellm.models import RequestConfig
 
         config = RequestConfig(stop=["END", "STOP"])
         kwargs = _build_request("gpt-4o", [], None, 0.7, 100, config)
@@ -489,8 +489,8 @@ class TestRequestConfigForwarding:
 
     @pytest.mark.asyncio
     async def test_tool_choice_forwarded(self):
-        from unifyllm.adapters.openai_compat import _build_request
-        from unifyllm.models import RequestConfig
+        from bridgellm.adapters.openai_compat import _build_request
+        from bridgellm.models import RequestConfig
 
         config = RequestConfig(tool_choice="required")
         tools = [{"type": "function", "function": {"name": "fn"}}]
@@ -499,8 +499,8 @@ class TestRequestConfigForwarding:
 
     @pytest.mark.asyncio
     async def test_sampling_params(self):
-        from unifyllm.adapters.openai_compat import _build_request
-        from unifyllm.models import RequestConfig
+        from bridgellm.adapters.openai_compat import _build_request
+        from bridgellm.models import RequestConfig
 
         config = RequestConfig(
             top_p=0.9,
@@ -516,8 +516,8 @@ class TestRequestConfigForwarding:
 
     @pytest.mark.asyncio
     async def test_logprobs(self):
-        from unifyllm.adapters.openai_compat import _build_request
-        from unifyllm.models import RequestConfig
+        from bridgellm.adapters.openai_compat import _build_request
+        from bridgellm.models import RequestConfig
 
         config = RequestConfig(logprobs=True, top_logprobs=5)
         kwargs = _build_request("gpt-4o", [], None, 0.7, 100, config)
@@ -526,8 +526,8 @@ class TestRequestConfigForwarding:
 
     @pytest.mark.asyncio
     async def test_reasoning_effort(self):
-        from unifyllm.adapters.openai_compat import _build_request
-        from unifyllm.models import RequestConfig
+        from bridgellm.adapters.openai_compat import _build_request
+        from bridgellm.models import RequestConfig
 
         config = RequestConfig(reasoning={"effort": "high"})
         kwargs = _build_request("o3", [], None, 0.7, 100, config)
@@ -535,8 +535,8 @@ class TestRequestConfigForwarding:
 
     @pytest.mark.asyncio
     async def test_service_tier(self):
-        from unifyllm.adapters.openai_compat import _build_request
-        from unifyllm.models import RequestConfig
+        from bridgellm.adapters.openai_compat import _build_request
+        from bridgellm.models import RequestConfig
 
         config = RequestConfig(service_tier="flex")
         kwargs = _build_request("gpt-4o", [], None, 0.7, 100, config)
@@ -544,8 +544,8 @@ class TestRequestConfigForwarding:
 
     @pytest.mark.asyncio
     async def test_parallel_tool_calls(self):
-        from unifyllm.adapters.openai_compat import _build_request
-        from unifyllm.models import RequestConfig
+        from bridgellm.adapters.openai_compat import _build_request
+        from bridgellm.models import RequestConfig
 
         config = RequestConfig(parallel_tool_calls=False)
         tools = [{"type": "function", "function": {"name": "fn"}}]
@@ -554,8 +554,8 @@ class TestRequestConfigForwarding:
 
     @pytest.mark.asyncio
     async def test_extra_passthrough(self):
-        from unifyllm.adapters.openai_compat import _build_request
-        from unifyllm.models import RequestConfig
+        from bridgellm.adapters.openai_compat import _build_request
+        from bridgellm.models import RequestConfig
 
         config = RequestConfig(extra={"custom_param": "value"})
         kwargs = _build_request("gpt-4o", [], None, 0.7, 100, config)
@@ -563,7 +563,7 @@ class TestRequestConfigForwarding:
 
     @pytest.mark.asyncio
     async def test_none_config_no_extras(self):
-        from unifyllm.adapters.openai_compat import _build_request
+        from bridgellm.adapters.openai_compat import _build_request
 
         kwargs = _build_request("gpt-4o", [], None, 0.7, 100, None)
         assert "response_format" not in kwargs
@@ -571,8 +571,8 @@ class TestRequestConfigForwarding:
 
     @pytest.mark.asyncio
     async def test_n_param(self):
-        from unifyllm.adapters.openai_compat import _build_request
-        from unifyllm.models import RequestConfig
+        from bridgellm.adapters.openai_compat import _build_request
+        from bridgellm.models import RequestConfig
 
         config = RequestConfig(n=3)
         kwargs = _build_request("gpt-4o", [], None, 0.7, 100, config)
@@ -581,7 +581,7 @@ class TestRequestConfigForwarding:
     @pytest.mark.asyncio
     async def test_complete_with_config(self):
         """End-to-end: config params reach the SDK call."""
-        from unifyllm.models import RequestConfig
+        from bridgellm.models import RequestConfig
 
         adapter = _create_adapter()
         mock_response = MockCompletion(

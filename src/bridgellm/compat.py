@@ -53,10 +53,10 @@ def verify_sdk_versions() -> list[str]:
 
         if major > version_range.max_major:
             msg = (
-                f"unifyllm {_UNIFYLLM_VERSION} was tested with "
+                f"bridgellm {_UNIFYLLM_VERSION} was tested with "
                 f"{version_range.package}<={version_range.max_major}.x, "
                 f"but you have {installed}. "
-                f"Run: pip install --upgrade unifyllm"
+                f"Run: pip install --upgrade bridgellm"
             )
             warning_messages.append(msg)
             warnings.warn(msg, stacklevel=2)
@@ -65,23 +65,23 @@ def verify_sdk_versions() -> list[str]:
 
 
 async def check_updates() -> Optional[str]:
-    """Check PyPI for a newer version of unifyllm.
+    """Check PyPI for a newer version of bridgellm.
 
     Returns a message if an update is available, or None if current.
     """
     try:
         async with httpx.AsyncClient(timeout=5.0) as http_client:
-            response = await http_client.get("https://pypi.org/pypi/unifyllm/json")
+            response = await http_client.get("https://pypi.org/pypi/bridgellm/json")
             if response.status_code != 200:
                 return None
             latest = response.json().get("info", {}).get("version", "")
             if latest and latest != _UNIFYLLM_VERSION:
                 return (
-                    f"unifyllm {latest} is available (you have {_UNIFYLLM_VERSION}). "
-                    f"Run: pip install --upgrade unifyllm"
+                    f"bridgellm {latest} is available (you have {_UNIFYLLM_VERSION}). "
+                    f"Run: pip install --upgrade bridgellm"
                 )
     except (httpx.RequestError, httpx.HTTPStatusError, OSError, ValueError):
-        logger.debug("Failed to check PyPI for unifyllm updates", exc_info=True)
+        logger.debug("Failed to check PyPI for bridgellm updates", exc_info=True)
     return None
 
 

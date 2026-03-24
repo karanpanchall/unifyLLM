@@ -1,17 +1,17 @@
-"""Tests for unifyllm.errors exception hierarchy."""
+"""Tests for bridgellm.errors exception hierarchy."""
 
-from unifyllm.errors import (
+from bridgellm.errors import (
     AllProvidersFailedError,
     ProviderError,
     ProviderNotFoundError,
     SDKNotInstalledError,
-    UnifyLLMError,
+    BridgeLLMError,
 )
 
 
-class TestUnifyLLMError:
+class TestBridgeLLMError:
     def test_base_exception(self):
-        error = UnifyLLMError("test message")
+        error = BridgeLLMError("test message")
         assert str(error) == "test message"
         assert isinstance(error, Exception)
 
@@ -26,7 +26,7 @@ class TestProviderNotFoundError:
 
     def test_inherits_from_base(self):
         error = ProviderNotFoundError("x", [])
-        assert isinstance(error, UnifyLLMError)
+        assert isinstance(error, BridgeLLMError)
 
     def test_attributes(self):
         error = ProviderNotFoundError("bad_provider", ["openai"])
@@ -37,12 +37,12 @@ class TestProviderNotFoundError:
 class TestSDKNotInstalledError:
     def test_message_includes_install_command(self):
         error = SDKNotInstalledError("anthropic", "anthropic", "anthropic")
-        assert "pip install unifyllm[anthropic]" in str(error)
+        assert "pip install bridgellm[anthropic]" in str(error)
         assert "anthropic" in str(error)
 
     def test_inherits_from_base(self):
         error = SDKNotInstalledError("p", "pkg", "extra")
-        assert isinstance(error, UnifyLLMError)
+        assert isinstance(error, BridgeLLMError)
 
     def test_attributes(self):
         error = SDKNotInstalledError("anthropic", "anthropic", "anthropic")
@@ -68,7 +68,7 @@ class TestProviderError:
         assert error.status_code == 500
 
     def test_inherits_from_base(self):
-        assert isinstance(ProviderError("p", "m"), UnifyLLMError)
+        assert isinstance(ProviderError("p", "m"), BridgeLLMError)
 
 
 class TestAllProvidersFailedError:
@@ -85,4 +85,4 @@ class TestAllProvidersFailedError:
         assert len(error.errors) == 2
 
     def test_inherits_from_base(self):
-        assert isinstance(AllProvidersFailedError([]), UnifyLLMError)
+        assert isinstance(AllProvidersFailedError([]), BridgeLLMError)

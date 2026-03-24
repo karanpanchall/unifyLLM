@@ -6,9 +6,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from unifyllm.adapters._convert import openai_pdf_to_anthropic
-from unifyllm.adapters.openai_compat import OpenAICompatAdapter, _parse_audio_output
-from unifyllm.models import (
+from bridgellm.adapters._convert import openai_pdf_to_anthropic
+from bridgellm.adapters.openai_compat import OpenAICompatAdapter, _parse_audio_output
+from bridgellm.models import (
     AudioConfig,
     AudioData,
     LLMResponse,
@@ -16,7 +16,7 @@ from unifyllm.models import (
     TTSResponse,
     TranscriptionResponse,
 )
-from unifyllm.registry import ProviderConfig
+from bridgellm.registry import ProviderConfig
 
 
 MOCK_CONFIG = ProviderConfig(base_url="https://api.example.com/v1", api_key_env="TEST_KEY")
@@ -64,7 +64,7 @@ class TestParseAudioOutput:
 
 class TestAudioInRequestConfig:
     def test_modalities_forwarded(self):
-        from unifyllm.adapters.openai_compat import _build_request
+        from bridgellm.adapters.openai_compat import _build_request
 
         config = RequestConfig(
             modalities=["text", "audio"],
@@ -75,7 +75,7 @@ class TestAudioInRequestConfig:
         assert kwargs["audio"] == {"voice": "nova", "format": "mp3"}
 
     def test_no_audio_no_keys(self):
-        from unifyllm.adapters.openai_compat import _build_request
+        from bridgellm.adapters.openai_compat import _build_request
 
         kwargs = _build_request("gpt-4o", [], None, 0.7, 100, None)
         assert "modalities" not in kwargs
@@ -139,7 +139,7 @@ class TestTTSAdapter:
         adapter = _create_adapter()
         adapter._client.audio.speech.create = AsyncMock(side_effect=RuntimeError("TTS failed"))
 
-        from unifyllm.errors import ProviderError
+        from bridgellm.errors import ProviderError
         with pytest.raises(ProviderError, match="TTS failed"):
             await adapter.speak(model="tts-1", text="Hello")
 
@@ -184,6 +184,6 @@ class TestTranscriptionAdapter:
         adapter = _create_adapter()
         adapter._client.audio.transcriptions.create = AsyncMock(side_effect=RuntimeError("STT failed"))
 
-        from unifyllm.errors import ProviderError
+        from bridgellm.errors import ProviderError
         with pytest.raises(ProviderError, match="STT failed"):
             await adapter.transcribe(model="whisper-1", audio_data=b"data")

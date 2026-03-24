@@ -1,11 +1,11 @@
-"""Tests for unifyllm.registry — provider config, parsing, and key resolution."""
+"""Tests for bridgellm.registry — provider config, parsing, and key resolution."""
 
 import os
 
 import pytest
 
-from unifyllm.errors import ProviderNotFoundError
-from unifyllm.registry import (
+from bridgellm.errors import ProviderNotFoundError
+from bridgellm.registry import (
     PROVIDERS,
     ProviderConfig,
     mask_key,

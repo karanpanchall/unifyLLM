@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "unifyllm"
+name = "bridgellm"
 version = "0.1.0"
 description = "Provider-agnostic LLM client with agentic capabilities. One interface, any provider."
 readme = "README.md"
@@ -51,14 +51,14 @@ Repository = "https://github.com/karanpanchall/unifyLLM"
 Issues = "https://github.com/karanpanchall/unifyLLM/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/unifyllm"]
+packages = ["src/bridgellm"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 
 [tool.coverage.run]
-source = ["unifyllm"]
+source = ["bridgellm"]
 
 [tool.coverage.report]
 fail_under = 90

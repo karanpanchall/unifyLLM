@@ -10,7 +10,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, AsyncIterator, Callable, Literal, Optional
 
-from .client import UnifyLLM
+from .client import BridgeLLM
 from .models import RequestConfig, StreamChunk, ToolCall
 from .tools import ToolDefinition, ToolRegistry
 
@@ -72,7 +72,7 @@ class AgentLoop:
 
     def __init__(
         self,
-        llm: UnifyLLM,
+        llm: BridgeLLM,
         tools: Optional[list[ToolDefinition]] = None,
         max_iterations: int = 25,
         timeout_seconds: Optional[float] = None,
@@ -88,7 +88,7 @@ class AgentLoop:
     ):
         """
         Args:
-            llm: UnifyLLM client instance.
+            llm: BridgeLLM client instance.
             tools: List of ToolDefinition objects (from @tool decorator).
             max_iterations: Maximum LLM call iterations before stopping.
             timeout_seconds: Wall-clock timeout for the entire loop. None = no limit.

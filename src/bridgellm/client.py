@@ -1,4 +1,4 @@
-"""Main UnifyLLM client — the single entry point for all LLM operations.
+"""Main BridgeLLM client — the single entry point for all LLM operations.
 
 Routes requests to the correct provider adapter based on the model string.
 Supports multi-provider API keys, task-specific default models, fallback
@@ -27,20 +27,20 @@ from .registry import ProviderConfig, get_provider_config, parse_model_string, r
 
 logger = logging.getLogger(__name__)
 
-_ENV_MODEL_KEY = "UNIFYLLM_MODEL"
+_ENV_MODEL_KEY = "BRIDGELLM_MODEL"
 _DEFAULT_MODEL = "gpt-4o-mini"
 
 
-class UnifyLLM:
+class BridgeLLM:
     """Provider-agnostic LLM client.
 
     Initialization options:
 
         # Minimal — reads OPENAI_API_KEY from env
-        llm = UnifyLLM()
+        llm = BridgeLLM()
 
         # Multi-provider with per-provider keys
-        llm = UnifyLLM(
+        llm = BridgeLLM(
             model="openai/gpt-4o",
             api_keys={"openai": "sk-...", "groq": "gsk-...", "anthropic": "sk-ant-..."},
             fallback_models=["groq/llama-3.3-70b"],
@@ -49,7 +49,7 @@ class UnifyLLM:
         )
 
         # From a config dict (load from YAML/JSON/settings)
-        llm = UnifyLLM.from_config({...})
+        llm = BridgeLLM.from_config({...})
     """
 
     def __init__(
@@ -113,7 +113,7 @@ class UnifyLLM:
                     logger.warning("Failed to initialize provider '%s': %s", provider_name, exc)
 
     @classmethod
-    def from_config(cls, config: dict) -> "UnifyLLM":
+    def from_config(cls, config: dict) -> "BridgeLLM":
         """Create a client from a configuration dictionary.
 
         Accepts the same keys as __init__ params. Useful for loading

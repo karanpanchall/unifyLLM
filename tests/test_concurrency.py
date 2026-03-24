@@ -9,7 +9,7 @@ import os
 
 import pytest
 
-from unifyllm import UnifyLLM, LLMResponse, StreamChunk, EmbeddingResponse
+from bridgellm import BridgeLLM, LLMResponse, StreamChunk, EmbeddingResponse
 
 SKIP_REASON = "OPENAI_API_KEY not set — skipping concurrency tests"
 requires_api_key = pytest.mark.skipif(
@@ -23,7 +23,7 @@ class TestConcurrentCompletions:
     @pytest.mark.asyncio
     async def test_10_concurrent_completions(self):
         """Fire 10 completions simultaneously on the same client."""
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
 
         async def single_call(call_index: int) -> LLMResponse:
             return await llm.complete(
@@ -44,7 +44,7 @@ class TestConcurrentCompletions:
     @pytest.mark.asyncio
     async def test_concurrent_different_models(self):
         """Fire concurrent calls to different models on the same client."""
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
 
         async def call_mini():
             return await llm.complete(
@@ -73,7 +73,7 @@ class TestConcurrentStreaming:
     @pytest.mark.asyncio
     async def test_3_concurrent_streams(self):
         """Run 3 streams simultaneously, each collecting independent text."""
-        llm = UnifyLLM(model="gpt-4o-mini")
+        llm = BridgeLLM(model="gpt-4o-mini")
 
         async def stream_call(number: int) -> str:
             collected = ""
@@ -99,7 +99,7 @@ class TestConcurrentEmbeddings:
     @pytest.mark.asyncio
     async def test_5_concurrent_embed_calls(self):
         """Fire 5 embedding calls simultaneously."""
-        llm = UnifyLLM(
+        llm = BridgeLLM(
             model="gpt-4o-mini",
             embedding_model="openai/text-embedding-3-small",
         )
@@ -123,7 +123,7 @@ class TestConcurrentMixed:
     @pytest.mark.asyncio
     async def test_mixed_operations(self):
         """Run completion, stream, and embed concurrently on the same client."""
-        llm = UnifyLLM(
+        llm = BridgeLLM(
             model="gpt-4o-mini",
             embedding_model="openai/text-embedding-3-small",
         )
@@ -161,7 +161,7 @@ class TestAdapterCacheConcurrency:
     @pytest.mark.asyncio
     async def test_concurrent_adapter_resolution(self, openai_api_key):
         """Verify concurrent _resolve_adapter calls don't create duplicate adapters."""
-        llm = UnifyLLM(model="openai/gpt-4o")
+        llm = BridgeLLM(model="openai/gpt-4o")
 
         async def resolve():
             return llm._resolve_adapter("openai/gpt-4o-mini")

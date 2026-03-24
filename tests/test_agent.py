@@ -5,10 +5,10 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from unifyllm.agent import AgentEvent, AgentLoop, RetryPolicy
-from unifyllm.client import UnifyLLM
-from unifyllm.models import LLMResponse, StreamChunk, ToolCall
-from unifyllm.tools import ToolDefinition, tool
+from bridgellm.agent import AgentEvent, AgentLoop, RetryPolicy
+from bridgellm.client import BridgeLLM
+from bridgellm.models import LLMResponse, StreamChunk, ToolCall
+from bridgellm.tools import ToolDefinition, tool
 
 
 @tool
@@ -24,8 +24,8 @@ async def failing_tool(value: str) -> str:
 
 
 def _make_llm(openai_api_key):
-    """Create a UnifyLLM with mocked adapter for testing."""
-    return UnifyLLM(model="openai/gpt-4o")
+    """Create a BridgeLLM with mocked adapter for testing."""
+    return BridgeLLM(model="openai/gpt-4o")
 
 
 class TestAgentLoopBasic:

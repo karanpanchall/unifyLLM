@@ -1,6 +1,6 @@
-"""Tests for unifyllm.models data types."""
+"""Tests for bridgellm.models data types."""
 
-from unifyllm.models import (
+from bridgellm.models import (
     EmbeddingResponse,
     LLMResponse,
     ModelInfo,

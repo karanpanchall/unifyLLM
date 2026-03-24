@@ -2,13 +2,13 @@
 
 import pytest
 
-from unifyllm.adapters import create_adapter
-from unifyllm.adapters.openai_compat import OpenAICompatAdapter
-from unifyllm.errors import SDKNotInstalledError
-from unifyllm.registry import ProviderConfig
+from bridgellm.adapters import create_adapter
+from bridgellm.adapters.openai_compat import OpenAICompatAdapter
+from bridgellm.errors import SDKNotInstalledError
+from bridgellm.registry import ProviderConfig
 
 try:
-    from unifyllm.adapters.anthropic import AnthropicAdapter
+    from bridgellm.adapters.anthropic import AnthropicAdapter
 except SDKNotInstalledError:
     AnthropicAdapter = None
 

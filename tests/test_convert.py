@@ -1,6 +1,6 @@
 """Tests for cross-adapter conversion utilities."""
 
-from unifyllm.adapters._convert import (
+from bridgellm.adapters._convert import (
     _merge_content,
     _repair_alternation,
     convert_messages_for_anthropic,
