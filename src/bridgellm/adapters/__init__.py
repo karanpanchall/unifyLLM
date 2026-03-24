@@ -8,7 +8,7 @@ def create_adapter(provider_name: str, config: ProviderConfig, api_key: str) -> 
     """Instantiate the correct adapter for a given provider.
 
     OpenAI-compatible providers share a single adapter class.
-    Non-compatible providers (anthropic) use dedicated adapters.
+    Non-compatible providers use dedicated adapters.
     """
     if config.openai_compatible:
         from .openai_compat import OpenAICompatAdapter
@@ -17,6 +17,14 @@ def create_adapter(provider_name: str, config: ProviderConfig, api_key: str) -> 
     if provider_name == "anthropic":
         from .anthropic import AnthropicAdapter
         return AnthropicAdapter(config=config, api_key=api_key)
+
+    if provider_name == "bedrock":
+        from .bedrock import BedrockAdapter
+        return BedrockAdapter(config=config, api_key=api_key)
+
+    if provider_name == "vertex":
+        from .vertex import VertexAdapter
+        return VertexAdapter(config=config, api_key=api_key)
 
     raise NotImplementedError(
         f"Provider '{provider_name}' is marked as non-OpenAI-compatible "

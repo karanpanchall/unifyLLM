@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "bridgellm"
-version = "0.2.0"
+version = "0.3.0"
 description = "Provider-agnostic LLM client with agentic capabilities. One interface, any provider."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -34,9 +34,13 @@ dependencies = [
 [project.optional-dependencies]
 anthropic = ["anthropic>=0.40.0,<1.0.0"]
 gemini = ["google-genai>=1.0.0,<2.0.0"]
+bedrock = ["boto3>=1.28.0"]
+vertex = ["google-auth>=2.0.0"]
 all = [
     "anthropic>=0.40.0,<1.0.0",
     "google-genai>=1.0.0,<2.0.0",
+    "boto3>=1.28.0",
+    "google-auth>=2.0.0",
 ]
 dev = [
     "pytest>=8.0",

@@ -18,12 +18,43 @@ class ProviderConfig:
     openai_compatible: bool = True
 
 
-# Provider catalog. Add new OpenAI-compatible providers here.
+# Provider catalog — all OpenAI-compatible providers work with zero adapter code.
+# Non-compatible providers (anthropic, bedrock, vertex) need dedicated adapters.
+# Users can add custom providers at runtime via register_provider().
 PROVIDERS: dict[str, ProviderConfig] = {
+    # ── Tier 1: Major providers ──────────────────────────────────────────
     "openai": ProviderConfig(
         base_url="https://api.openai.com/v1",
         api_key_env="OPENAI_API_KEY",
     ),
+    "anthropic": ProviderConfig(
+        base_url="https://api.anthropic.com",
+        api_key_env="ANTHROPIC_API_KEY",
+        openai_compatible=False,
+    ),
+    "gemini": ProviderConfig(
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai",
+        api_key_env="GEMINI_API_KEY",
+    ),
+    "mistral": ProviderConfig(
+        base_url="https://api.mistral.ai/v1",
+        api_key_env="MISTRAL_API_KEY",
+    ),
+    "deepseek": ProviderConfig(
+        base_url="https://api.deepseek.com",
+        api_key_env="DEEPSEEK_API_KEY",
+        models_path="/models",
+    ),
+    "xai": ProviderConfig(
+        base_url="https://api.x.ai/v1",
+        api_key_env="XAI_API_KEY",
+    ),
+    "cohere": ProviderConfig(
+        base_url="https://api.cohere.com/v2",
+        api_key_env="COHERE_API_KEY",
+    ),
+
+    # ── Tier 2: Inference platforms ──────────────────────────────────────
     "groq": ProviderConfig(
         base_url="https://api.groq.com/openai/v1",
         api_key_env="GROQ_API_KEY",
@@ -36,39 +67,121 @@ PROVIDERS: dict[str, ProviderConfig] = {
         base_url="https://api.fireworks.ai/inference/v1",
         api_key_env="FIREWORKS_API_KEY",
     ),
-    "deepseek": ProviderConfig(
-        base_url="https://api.deepseek.com",
-        api_key_env="DEEPSEEK_API_KEY",
-        models_path="/models",
-    ),
-    "mistral": ProviderConfig(
-        base_url="https://api.mistral.ai/v1",
-        api_key_env="MISTRAL_API_KEY",
-    ),
-    "openrouter": ProviderConfig(
-        base_url="https://openrouter.ai/api/v1",
-        api_key_env="OPENROUTER_API_KEY",
-    ),
     "cerebras": ProviderConfig(
         base_url="https://api.cerebras.ai/v1",
         api_key_env="CEREBRAS_API_KEY",
     ),
-    "xai": ProviderConfig(
-        base_url="https://api.x.ai/v1",
-        api_key_env="XAI_API_KEY",
+    "sambanova": ProviderConfig(
+        base_url="https://api.sambanova.ai/v1",
+        api_key_env="SAMBANOVA_API_KEY",
+    ),
+    "deepinfra": ProviderConfig(
+        base_url="https://api.deepinfra.com/v1/openai",
+        api_key_env="DEEPINFRA_API_KEY",
+    ),
+    "hyperbolic": ProviderConfig(
+        base_url="https://api.hyperbolic.xyz/v1",
+        api_key_env="HYPERBOLIC_API_KEY",
+    ),
+    "novita": ProviderConfig(
+        base_url="https://api.novita.ai/v3/openai",
+        api_key_env="NOVITA_API_KEY",
+    ),
+    "lambda": ProviderConfig(
+        base_url="https://api.lambdalabs.com/v1",
+        api_key_env="LAMBDA_API_KEY",
+    ),
+    "featherless": ProviderConfig(
+        base_url="https://api.featherless.ai/v1",
+        api_key_env="FEATHERLESS_API_KEY",
+    ),
+    "nscale": ProviderConfig(
+        base_url="https://inference.api.nscale.com/v1",
+        api_key_env="NSCALE_API_KEY",
+    ),
+
+    # ── Tier 3: Aggregators / Gateways ───────────────────────────────────
+    "openrouter": ProviderConfig(
+        base_url="https://openrouter.ai/api/v1",
+        api_key_env="OPENROUTER_API_KEY",
     ),
     "perplexity": ProviderConfig(
         base_url="https://api.perplexity.ai",
         api_key_env="PERPLEXITY_API_KEY",
     ),
-    "gemini": ProviderConfig(
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai",
-        api_key_env="GEMINI_API_KEY",
+
+    # ── Tier 4: Enterprise cloud ─────────────────────────────────────────
+    "azure": ProviderConfig(
+        base_url="",  # Must be set via base_url param or AZURE_OPENAI_BASE_URL
+        api_key_env="AZURE_OPENAI_API_KEY",
     ),
-    "anthropic": ProviderConfig(
-        base_url="https://api.anthropic.com",
-        api_key_env="ANTHROPIC_API_KEY",
+    "nvidia": ProviderConfig(
+        base_url="https://integrate.api.nvidia.com/v1",
+        api_key_env="NVIDIA_API_KEY",
+    ),
+    "databricks": ProviderConfig(
+        base_url="",  # Must be set via base_url param (workspace-specific)
+        api_key_env="DATABRICKS_API_KEY",
+    ),
+    "watsonx": ProviderConfig(
+        base_url="",  # Must be set via base_url param (instance-specific)
+        api_key_env="WATSONX_API_KEY",
+    ),
+    "github": ProviderConfig(
+        base_url="https://models.inference.ai.azure.com",
+        api_key_env="GITHUB_TOKEN",
+    ),
+
+    # ── Tier 5: Specialty / Regional ─────────────────────────────────────
+    "ai21": ProviderConfig(
+        base_url="https://api.ai21.com/studio/v1",
+        api_key_env="AI21_API_KEY",
+    ),
+    "moonshot": ProviderConfig(
+        base_url="https://api.moonshot.cn/v1",
+        api_key_env="MOONSHOT_API_KEY",
+    ),
+    "dashscope": ProviderConfig(
+        base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        api_key_env="DASHSCOPE_API_KEY",
+    ),
+    "volcengine": ProviderConfig(
+        base_url="https://ark.cn-beijing.volces.com/api/v3",
+        api_key_env="VOLCENGINE_API_KEY",
+    ),
+    "friendli": ProviderConfig(
+        base_url="https://inference.friendli.ai/v1",
+        api_key_env="FRIENDLI_API_KEY",
+    ),
+    "nebius": ProviderConfig(
+        base_url="https://api.studio.nebius.ai/v1",
+        api_key_env="NEBIUS_API_KEY",
+    ),
+
+    # ── AWS / GCP native (non-OpenAI-compatible, need dedicated adapters)
+    "bedrock": ProviderConfig(
+        base_url="us-east-1",  # Region — override with base_url param
+        api_key_env="AWS_ACCESS_KEY_ID",
         openai_compatible=False,
+    ),
+    "vertex": ProviderConfig(
+        base_url="us-central1",  # Region — override with base_url param
+        api_key_env="GOOGLE_CLOUD_PROJECT",  # Project ID
+        openai_compatible=False,
+    ),
+
+    # ── Tier 6: Local / Self-hosted ──────────────────────────────────────
+    "ollama": ProviderConfig(
+        base_url="http://localhost:11434/v1",
+        api_key_env="OLLAMA_API_KEY",  # Usually not needed
+    ),
+    "lmstudio": ProviderConfig(
+        base_url="http://localhost:1234/v1",
+        api_key_env="LMSTUDIO_API_KEY",
+    ),
+    "vllm": ProviderConfig(
+        base_url="http://localhost:8000/v1",
+        api_key_env="VLLM_API_KEY",
     ),
 }
 
