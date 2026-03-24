@@ -16,6 +16,7 @@ class ProviderConfig:
     api_key_env: str
     models_path: str = "/v1/models"
     openai_compatible: bool = True
+    max_tokens_param: str = "max_tokens"  # "max_tokens" or "max_completion_tokens"
 
 
 # Provider catalog — all OpenAI-compatible providers work with zero adapter code.
@@ -26,6 +27,7 @@ PROVIDERS: dict[str, ProviderConfig] = {
     "openai": ProviderConfig(
         base_url="https://api.openai.com/v1",
         api_key_env="OPENAI_API_KEY",
+        max_tokens_param="max_completion_tokens",
     ),
     "anthropic": ProviderConfig(
         base_url="https://api.anthropic.com",
@@ -58,6 +60,7 @@ PROVIDERS: dict[str, ProviderConfig] = {
     "groq": ProviderConfig(
         base_url="https://api.groq.com/openai/v1",
         api_key_env="GROQ_API_KEY",
+        max_tokens_param="max_completion_tokens",
     ),
     "together": ProviderConfig(
         base_url="https://api.together.xyz/v1",

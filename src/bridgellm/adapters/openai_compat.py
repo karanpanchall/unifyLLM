@@ -38,6 +38,7 @@ class OpenAICompatAdapter(LLMAdapter):
 
     def __init__(self, provider_name: str, config: ProviderConfig, api_key: str):
         self._provider = provider_name
+        self._config = config
         self._client = AsyncOpenAI(base_url=config.base_url, api_key=api_key)
 
     async def complete(
@@ -52,7 +53,7 @@ class OpenAICompatAdapter(LLMAdapter):
         if not messages:
             raise ProviderError(self._provider, "messages list cannot be empty")
 
-        kwargs = _build_request(model, messages, tools, temperature, max_tokens, config)
+        kwargs = _build_request(model, messages, tools, temperature, max_tokens, config, self._config.max_tokens_param)
 
         try:
             response = await self._client.chat.completions.create(**kwargs)
@@ -91,7 +92,7 @@ class OpenAICompatAdapter(LLMAdapter):
         if not messages:
             raise ProviderError(self._provider, "messages list cannot be empty")
 
-        kwargs = _build_request(model, messages, tools, temperature, max_tokens, config)
+        kwargs = _build_request(model, messages, tools, temperature, max_tokens, config, self._config.max_tokens_param)
 
         kwargs["stream"] = True
         kwargs["stream_options"] = {"include_usage": True}
@@ -224,8 +225,14 @@ class OpenAICompatAdapter(LLMAdapter):
 def _build_request(
     model: str, messages: list[dict], tools: Optional[list[dict]],
     temperature: Optional[float], max_tokens: Optional[int], config: Optional[RequestConfig],
+    max_tokens_param: str = "max_tokens",
 ) -> dict:
-    """Assemble kwargs for the OpenAI SDK call, applying all RequestConfig params."""
+    """Assemble kwargs for the OpenAI SDK call, applying all RequestConfig params.
+
+    max_tokens_param controls the parameter name sent to the API:
+    - "max_tokens" for Together, DeepSeek, Mistral, etc.
+    - "max_completion_tokens" for OpenAI, Groq (where max_tokens is deprecated)
+    """
     kwargs: dict = {"model": model, "messages": messages}
     if temperature is not None:
         kwargs["temperature"] = temperature
@@ -233,7 +240,7 @@ def _build_request(
         kwargs["tools"] = tools
         kwargs["tool_choice"] = (config.tool_choice if config and config.tool_choice else "auto")
     if max_tokens:
-        kwargs["max_tokens"] = max_tokens
+        kwargs[max_tokens_param] = max_tokens
 
     if not config:
         return kwargs
