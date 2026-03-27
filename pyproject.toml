@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "bridgellm"
-version = "0.3.2"
+version = "0.3.3"
 description = "Provider-agnostic LLM client with agentic capabilities. One interface, any provider."
 readme = "README.md"
 requires-python = ">=3.11"
