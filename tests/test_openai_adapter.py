@@ -386,11 +386,11 @@ class TestOpenAICompatEmbed:
             )
 
         adapter._client.embeddings.create = mock_embed
-        texts = [f"text_{num}" for num in range(250)]
+        texts = [f"text_{num}" for num in range(1200)]
         result = await adapter.embed(model="model", texts=texts)
 
-        assert len(result.vectors) == 250
-        assert call_count == 3  # 100 + 100 + 50
+        assert len(result.vectors) == 1200
+        assert call_count == 3  # 500 + 500 + 200
 
 
 class TestOpenAICompatListModels:
